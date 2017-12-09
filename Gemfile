@@ -22,8 +22,6 @@ group :development do
 end
 
 group :development, :test do
-  gem 'webrick', '~>1.3', '>=1.3.1', :platforms=>[:mingw, :mswin, :x64_mingw, :jruby]
-  gem 'tzinfo-data', :platforms=>[:mingw, :mswin, :x64_mingw, :jruby]
   gem 'sqlite3', '~>1.3', '>=1.3.12'
   gem 'byebug', '~>9.0', '>=9.0.6'
   gem 'pry-byebug', '~>3.4', '>=3.4.0'
@@ -37,6 +35,7 @@ group :development, :test do
   gem 'chromedriver-helper', '~>1.0', '>=1.0.0'
   gem 'launchy', '~>2.4', '>=2.4.3'
   gem 'simplecov', '~>0', '>=0.12', :require=>false
+  gem 'figaro'
 end
 
 group :production do
