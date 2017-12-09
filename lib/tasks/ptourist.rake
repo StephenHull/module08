@@ -4,7 +4,7 @@ namespace :ptourist do
   ORIGINATORS=["carol","alice"]
   BOYS=["greg","peter","bobby"]
   GIRLS=["marsha","jan","cindy"]
-  BASE_URL="http://dev9.jhuep.com/fullstack-capstone"
+  BASE_URL="https://dev9.jhuep.com/fullstack-capstone"
 
   def user_name first_name
     last_name = (first_name=="alice") ? "nelson" : "brady"
@@ -67,7 +67,7 @@ namespace :ptourist do
     ImageContentCreator.new(img[:image], original_content).build_contents.save!
   end
 
-  def create_thing thing, organizer, members, images
+  def create_thing thing, organizer, members, images, types=[]
     thing=Thing.create!(thing)
     organizer.add_role(Role::ORGANIZER, thing).save
     m=members.map { |member|
@@ -87,6 +87,23 @@ namespace :ptourist do
                 .tap {|ti| ti.priority=img[:priority] if img[:priority]}.save!
       create_image_content img.merge(:image=>image)
     end
+    types.each do |type|
+      if type[:id].nil?
+        puts "building type for #{thing.name}, #{type[:name]}, by #{organizer.name}"
+        type=Type.create(:name=>type[:name])
+        organizer.add_role(Role::ORGANIZER, type).save
+      else
+        puts "building type for #{thing.name}, #{type[:id]}, #{type[:name]}, by #{organizer.name}"
+      end
+      ThingType.new(:thing=>thing, :type=>type).save!
+    end
+  end
+
+  def create_type organizer, type
+    puts "building type for #{type[:name]}, by #{organizer.name}"
+    type=Type.create(:name=>type[:name])
+    organizer.add_role(Role::ORGANIZER, type).save
+    return type
   end
 
   desc "reset all data"
@@ -123,14 +140,57 @@ namespace :ptourist do
 
     originator_users.each do |user|
       user.add_role(Role::ORIGINATOR, Thing).save
+      user.add_role(Role::ORIGINATOR, Type).save
     end
 
     puts "users:#{User.pluck(:name)}"
   end
 
-  desc "reset things, images, and links" 
+  desc "reset things, images, types, and links"
   task subjects: [:users] do
-    puts "creating things, images, and links"
+    puts "creating things, images, types, and links"
+
+    organizer=get_user("alice")
+    type={
+        :name=>"ADA accessible trails",
+        :notes=>"All of our walking trails are ADA accessible."
+    }
+    type_ada_trails=create_type(organizer, type)
+
+    organizer=get_user("carol")
+    type={
+        :name=>"Motorized wheelchair rental",
+        :notes=>"Motorized wheelchairs available for rent on a first come first served basis."
+    }
+    type_wheelchair_rental=create_type(organizer, type)
+
+    organizer=get_user("alice")
+    type={
+        :name=>"Personal guided tour",
+        :notes=>"A personal guided tour of the grounds is available on request."
+    }
+    type_guided_tour=create_type(organizer, type)
+
+    organizer=get_user("carol")
+    type={
+        :name=>"Audio walking tour",
+        :notes=>"All exhibits are included in the audio walking tour."
+    }
+    type_audio_tour=create_type(organizer, type)
+
+    organizer=get_user("alice")
+    type={
+        :name=>"Jet ski rental",
+        :notes=>"Jet skis are only available on the weekend."
+    }
+    type_jet_ski_rental=create_type organizer, type
+
+    organizer=get_user("carol")
+    type={
+        :name=>"Scooter rental",
+        :notes=>"Scooters can only carry one person."
+    }
+    type_scooter_rental=create_type organizer, type
 
     thing={:name=>"B&O Railroad Museum",
     :description=>"Discover your adventure at the B&O Railroad Museum in Baltimore, Maryland. Explore 40 acres of railroad history at the birthplace of American railroading. See, touch, and hear the most important American railroad collection in the world! Seasonal train rides for all ages.",
@@ -152,7 +212,13 @@ namespace :ptourist do
      :lng=>-76.6327453,
      :lat=>39.2854217},
     ]
-    create_thing thing, organizer, members, images
+    types=[
+      {
+       :name=>"Free train ride"
+      },
+      type_wheelchair_rental
+    ]
+    create_thing thing, organizer, members, images, types
 
     thing={:name=>"Baltimore Water Taxi",
     :description=>"The Water Taxi is more than a jaunt across the harbor; it’s a Baltimore institution and a way of life. Every day, thousands of residents and visitors not only rely on us to take them safely to their destinations, they appreciate our knowledge of the area and our courteous service. And every day, hundreds of local businesses rely on us to deliver customers to their locations.  We know the city. We love the city. We keep the city moving. We help keep businesses thriving. And most importantly, we offer the most unique way to see Baltimore and provide an unforgettable experience that keeps our passengers coming back again and again.",
@@ -178,7 +244,13 @@ namespace :ptourist do
      :lng=>-76.605206,
      :lat=>39.284038}
     ]
-    create_thing thing, organizer, members, images
+    types=[
+        {
+            :name=>"Free boat ride"
+        },
+        type_guided_tour
+    ]
+    create_thing thing, organizer, members, images, types
 
     thing={:name=>"Rent-A-Tour",
     :description=>"Professional guide services and itinerary planner in Baltimore, Washington DC, Annapolis and the surronding region",
@@ -198,7 +270,12 @@ namespace :ptourist do
      :priority=>0
      }
     ]
-    create_thing thing, organizer, members, images
+    types=[
+        {
+            :name=>"Free brochure"
+        }
+    ]
+    create_thing thing, organizer, members, images, types
 
     thing={:name=>"Holiday Inn Timonium",
     :description=>"Group friendly located just a few miles north of Baltimore's Inner Harbor. Great neighborhood in Baltimore County",
@@ -213,7 +290,18 @@ namespace :ptourist do
      :priority=>0
      }
     ]
-    create_thing thing, organizer, members, images
+    types=[
+        {
+            :name=>"Indoor swimming pool"
+        },
+        {
+            :name=>"Putt putt golf"
+        },
+        type_jet_ski_rental,
+        type_scooter_rental,
+        type_wheelchair_rental
+    ]
+    create_thing thing, organizer, members, images, types
 
     thing={:name=>"National Aquarium",
     :description=>"Since first opening in 1981, the National Aquarium has become a world-class attraction in the heart of Baltimore. Recently celebrating our 35th Anniversary, we continue to be a symbol of urban renewal and a source of pride for Marylanders. With a mission to inspire the world’s aquatic treasures, the Aquarium is consistently ranked as one of the nation’s top aquariums and has hosted over 51 million guests since opening. A study by the Maryland Department of Economic and Employment Development determined that the Aquarium annually generates nearly $220 million in revenues, 2,000 jobs, and $6.8 million in State and local taxes. It was also recently named one of Baltimore’s Best Places to Work! In addition to housing nearly 20,000 animals, we have countless science-based education programs and hands-on conservation projects spanning from right here in the Chesapeake Bay to abroad in Costa Rica. Once you head inside, The National Aquarium has the ability to transport you all over the world in a matter of hours to discover hundreds of incredible species. From the Freshwater Crocodile in our Australia: Wild Extremes exhibit all the way to a Largetooth Sawfish in the depths of Shark Alley. Recently winning top honors from the Association of Zoos and Aquariums for outstanding design, exhibit innovation and guest engagement, we can’t forget about Living Seashore; an exhibit where guests can touch Atlantic stingrays, Horseshoe crabs, and even Moon jellies if they wish! It is a place for friends, family, and people from all walks of life to come and learn about the extraordinary creatures we share our planet with. Through education, research, conservation action and advocacy, the National Aquarium is truly pursuing a vision to change the way humanity cares for our ocean planet.",
@@ -243,7 +331,14 @@ namespace :ptourist do
      :lat=>39.2851,
      }
     ]
-    create_thing thing, organizer, members, images
+    types=[
+        {
+            :name=>"IMAX"
+        },
+        type_audio_tour,
+        type_wheelchair_rental
+    ]
+    create_thing thing, organizer, members, images, types
 
     thing={:name=>"Hyatt Place Baltimore",
     :description=>"The New Hyatt Place Baltimore/Inner Harbor, located near Fells Point, offers a refreshing blend of style and innovation in a neighborhood alive with cultural attractions, shopping and amazing local restaurants. 
@@ -302,6 +397,13 @@ Work up a sweat in our 24-hour StayFit Gym, which features Life Fitness® cardio
      :lng=>-76.5987, 
      :lat=>39.2847
      }
+    ]
+    types=[
+        {
+            :name=>"StayFit Gym"
+        },
+        type_ada_trails,
+        type_wheelchair_rental
     ]
     create_thing thing, organizer, members, images
 

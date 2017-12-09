@@ -15,12 +15,17 @@ Rails.application.routes.draw do
     end
     resources :things, except: [:new, :edit] do
       resources :thing_images, only: [:index, :create, :update, :destroy]
+      resources :thing_types, only: [:index, :create, :update, :destroy]
+    end
+    resources :types, except: [:new, :edit] do
+      post "thing_types",  controller: :thing_types, action: :create
+      get "thing_types",  controller: :thing_types, action: :type_things
     end
     get "images/:id/content", as: :image_content, controller: :images, action: :content, defaults:{format: :jpg}
     get 'geocoder/addresses' => "geocoder#addresses"
     get 'geocoder/positions' => "geocoder#positions"
     get 'subjects' => "thing_images#subjects"
-  end      
+  end
 
   get "/client-assets/:name.:format", :to => redirect("/client/client-assets/%{name}.%{format}")
 #  get "/", :to => redirect("/client/index.html")

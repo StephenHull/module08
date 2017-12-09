@@ -9,7 +9,23 @@ class ThingsController < ApplicationController
 
   def index
     authorize Thing
-    things = policy_scope(Thing.all)
+    filter=index_params
+    puts "filter"
+    puts filter
+    if (!filter.nil?)
+      begin
+        type_id=filter['type_id'].to_i unless filter['type_id'].blank?
+      rescue
+        # nothing to do
+      end
+      if !type_id.nil?
+        things = Thing.with_type(type_id)
+      end
+    end
+    if things.nil?
+      things=Thing.all.with_types
+    end
+    things = policy_scope(things)
     @things = ThingPolicy.merge(things)
   end
 
@@ -55,6 +71,10 @@ class ThingsController < ApplicationController
   end
 
   private
+
+  def index_params
+    params.permit(:type_id)
+  end
 
     def set_thing
       @thing = Thing.find(params[:id])
