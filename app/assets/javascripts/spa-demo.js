@@ -58,6 +58,7 @@
 //= require spa-demo/subjects/images/image_linkable_things.service
 //= require spa-demo/subjects/images/images.component
 //= require spa-demo/subjects/images/images_authz.directive
+//= require spa-demo/subjects/subjects/subjects.service
 //= require spa-demo/subjects/things/things.service
 //= require spa-demo/subjects/things/thing_images.service
 //= require spa-demo/subjects/things/things_authz.service
@@ -68,3 +69,7 @@
 //= require spa-demo/subjects/current_subjects/current_subjects.component
 //= require spa-demo/subjects/current_images/current_images.component
 //= require spa-demo/subjects/current_things/current_things.component
+
+//= require spa-demo/subjects/search_subjects/search_subjects.service
+//= require spa-demo/subjects/search_subjects/search_subjects.component
+//= require spa-demo/subjects/search_things/search_things.component
