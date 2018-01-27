@@ -1,6 +1,8 @@
 # 
 source 'https://rubygems.org'
 
+ruby '2.3.1'
+
 gem 'rails', '4.2.6'
 gem 'rails-api', '~>0.4', '>=0.4.0'
 gem 'pry-rails', '~>0.3', '>=0.3.4'
@@ -42,7 +44,7 @@ group :production do
   gem 'rails_12factor', '~>0.0', '>= 0.0.3'
 end
 
-gem 'pg', '~>0.19', '>=0.19.0'
+gem 'pg', '~>0.20.0'
 gem 'puma', '~>3.6', '>=3.6.0', :platforms=>:ruby
 gem 'mongoid', '~>5.1', '>=5.1.5'
 gem 'database_cleaner', '~>1.5', '>=1.5.3'
