@@ -192,6 +192,10 @@ sd-image-viewer div.image-items span.id {
   display: none;
 }
 
+/***** Search Things Component *****/
+sd-search-things span.id {
+    display: none;
+}
 
 /*** media queries ****/
 
